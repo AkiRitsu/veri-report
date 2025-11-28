@@ -164,24 +164,13 @@
     </div>
     @endif
 
-    @if($report->pdf_hash)
-    <div class="section">
-        <h2>PDF Verification Hash</h2>
-        <div class="hash-box">
-            {{ $report->pdf_hash }}
-        </div>
-        <p style="font-size: 10px; color: #6b7280; margin-top: 5px;">
-            This hash can be used to verify the integrity of this PDF document. 
-            Compare this hash with the hash stored in the system to ensure the document has not been altered.
-        </p>
-    </div>
-    @endif
 
     <div class="footer">
         <p><strong>Created At:</strong> {{ $report->created_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s') }}</p>
-        <p><strong>Last Updated:</strong> {{ $report->updated_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s') }}</p>
         @if($report->completed_at)
             <p><strong>Completed At:</strong> {{ $report->completed_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s') }}</p>
+        @else
+            <p><strong>Last Updated:</strong> {{ $report->updated_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s') }}</p>
         @endif
         <p><strong>Created By:</strong> {{ $report->user->name }}</p>
     </div>

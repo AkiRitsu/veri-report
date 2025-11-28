@@ -91,11 +91,15 @@
     </div>
     @endif
 
-    @if($report->pdf_hash)
+    @if($report->status === 'complete' && $report->pdf_hash)
     <div style="margin-top: 1.5rem; padding: 1rem; background-color: var(--bg-primary); border-radius: 0.25rem; border: 1px solid var(--border);">
         <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">PDF Verification Hash</h3>
         <p style="font-family: monospace; word-break: break-all; color: var(--text-primary); background-color: var(--bg-secondary); padding: 0.5rem; border-radius: 0.25rem;">{{ $report->pdf_hash }}</p>
-        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">Use this hash to verify the integrity of the PDF document.</p>
+        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            <strong>SHA-256 Hash:</strong> This hash is calculated from the PDF file content. 
+            To verify the integrity of the exported PDF document, calculate the SHA-256 hash of the PDF file 
+            and compare it with the hash shown above. They should match exactly.
+        </p>
     </div>
     @endif
 

@@ -105,10 +105,10 @@
                             </form>
                             <a href="<?php echo e(route('reports.show', $report)); ?>" class="btn btn-secondary reports-action-btn">View</a>
                             <a href="<?php echo e(route('reports.export', $report)); ?>" class="btn btn-primary reports-action-btn">Export PDF</a>
-                            <form method="POST" action="<?php echo e(route('reports.send-email', $report)); ?>" style="display: inline;">
-                                <?php echo csrf_field(); ?>
+                        <form method="POST" action="<?php echo e(route('reports.send-email', $report)); ?>" style="display: inline;">
+                            <?php echo csrf_field(); ?>
                                 <button type="submit" class="btn btn-success reports-action-btn">Email</button>
-                            </form>
+                        </form>
                         </div>
                     </td>
                 </tr>

@@ -7,6 +7,7 @@ use App\Services\PdfService;
 use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -168,43 +169,58 @@ class ReportController extends Controller
 
         $report->update($validated);
 
+        // Note: Hash will be recalculated when PDF is exported or emailed
+        // We don't calculate it here to ensure it matches the actual exported PDF
+
         return redirect()->route('reports.index')->with('success', 'Report updated successfully.');
     }
 
     /**
      * Mark the report as complete.
+     * Note: Hash is NOT calculated here - it will be calculated when PDF is exported or emailed.
      */
     public function complete(Report $report)
     {
         $report->markAsComplete();
-
-        // Generate PDF hash immediately when report is completed
-        if (!$report->pdf_hash) {
-            try {
-                $pdf = $this->pdfService->generatePdf($report);
-                $hash = $this->pdfService->generateHash($pdf);
-                $report->update(['pdf_hash' => $hash]);
-                $report->refresh(); // Refresh to get updated hash
-            } catch (\Exception $e) {
-                // Log error but don't fail the completion
-                \Log::error('Failed to generate PDF hash on completion: ' . $e->getMessage());
-            }
-        }
 
         return redirect()->back()->with('success', 'Report marked as complete.');
     }
 
     /**
      * Export the report as PDF.
+     * This is where the hash is calculated and stored - ensuring it matches the exported PDF.
      */
     public function exportPdf(Report $report)
     {
-        $pdf = $this->pdfService->generatePdf($report);
-        $hash = $this->pdfService->generateHash($pdf);
-
-        // Update report with hash if not already set
-        if (!$report->pdf_hash) {
-            $report->update(['pdf_hash' => $hash]);
+        try {
+            // Generate PDF and calculate hash from the ACTUAL exported PDF
+            // This ensures the hash matches exactly what the user downloads
+            $result = $this->pdfService->generatePdfWithHash($report);
+            $pdf = $result['pdf'];
+            $hash = $result['hash'];
+            
+            // Update the stored hash when exporting (ensures it matches the exported PDF)
+            // Only update if hash doesn't exist or if it's different (to avoid unnecessary updates)
+            // Use DB::table() to update without touching updated_at timestamp
+            if (!$report->pdf_hash || $report->pdf_hash !== $hash) {
+                DB::table('reports')
+                    ->where('id', $report->id)
+                    ->update(['pdf_hash' => $hash]);
+                $report->refresh(); // Refresh to get updated hash
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to generate PDF on export: ' . $e->getMessage());
+            // Fallback: generate PDF
+            $pdf = $this->pdfService->generatePdf($report);
+            $hash = $this->pdfService->generateHash($pdf);
+            // Only update if hash doesn't exist (don't overwrite with potentially incorrect hash)
+            // Use DB::table() to update without touching updated_at timestamp
+            if (!$report->pdf_hash) {
+                DB::table('reports')
+                    ->where('id', $report->id)
+                    ->update(['pdf_hash' => $hash]);
+                $report->refresh(); // Refresh to get updated hash
+            }
         }
 
         $filename = 'report_' . $report->id . '_' . now()->format('Y-m-d') . '.pdf';
@@ -216,17 +232,39 @@ class ReportController extends Controller
 
     /**
      * Send the report via email.
+     * This is where the hash is calculated and stored - ensuring it matches the PDF sent via email.
+     * 
+     * Note: If a hash already exists (from export), we use that hash to maintain consistency.
+     * However, we still generate a fresh PDF for the email to ensure it's current.
      */
     public function sendEmail(Report $report)
     {
         try {
+            // Generate PDF for email
             $pdf = $this->pdfService->generatePdf($report);
+            
+            // Calculate hash from the PDF being sent
             $hash = $this->pdfService->generateHash($pdf);
-
-            // Update report with hash if not already set
-            if (!$report->pdf_hash) {
-                $report->update(['pdf_hash' => $hash]);
+            
+            // If hash already exists (from previous export), check if it matches
+            // If it doesn't match, it means DomPDF generated a different PDF
+            // In this case, we update the hash to match the emailed PDF
+            // Use DB::table() to update without touching updated_at timestamp
+            if ($report->pdf_hash && $report->pdf_hash !== $hash) {
+                // Hash differs - this is expected due to DomPDF non-determinism
+                // Update to match the emailed PDF
+                DB::table('reports')
+                    ->where('id', $report->id)
+                    ->update(['pdf_hash' => $hash]);
+                $report->refresh(); // Refresh to get updated hash
+            } elseif (!$report->pdf_hash) {
+                // No hash exists yet, store the calculated hash
+                DB::table('reports')
+                    ->where('id', $report->id)
+                    ->update(['pdf_hash' => $hash]);
+                $report->refresh(); // Refresh to get updated hash
             }
+            // If hash matches existing hash, no update needed
 
             $this->emailService->sendReportEmail($report, $pdf, $hash);
 

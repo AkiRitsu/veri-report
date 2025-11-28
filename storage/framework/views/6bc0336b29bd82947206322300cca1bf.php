@@ -121,8 +121,8 @@
                                 </form>
                                 <a href="<?php echo e(route('reports.show', ['report' => $report, 'from' => 'all-reports'])); ?>" class="btn btn-secondary reports-action-btn">View</a>
                                 <a href="<?php echo e(route('reports.edit', $report)); ?>" class="btn btn-primary reports-action-btn">Edit</a>
-                                <form method="POST" action="<?php echo e(route('reports.complete', $report)); ?>" style="display: inline;">
-                                    <?php echo csrf_field(); ?>
+                            <form method="POST" action="<?php echo e(route('reports.complete', $report)); ?>" style="display: inline;">
+                                <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn btn-success reports-action-btn">Complete</button>
                                 </form>
                             </div>
@@ -132,13 +132,13 @@
                                     <?php echo csrf_field(); ?>
                                     <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="btn btn-danger reports-action-btn">Delete</button>
-                                </form>
+                            </form>
                                 <a href="<?php echo e(route('reports.show', ['report' => $report, 'from' => 'all-reports'])); ?>" class="btn btn-secondary reports-action-btn">View</a>
                                 <a href="<?php echo e(route('reports.export', $report)); ?>" class="btn btn-primary reports-action-btn">Export PDF</a>
-                                <form method="POST" action="<?php echo e(route('reports.send-email', $report)); ?>" style="display: inline;">
-                                    <?php echo csrf_field(); ?>
+                        <form method="POST" action="<?php echo e(route('reports.send-email', $report)); ?>" style="display: inline;">
+                            <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn btn-success reports-action-btn">Email</button>
-                                </form>
+                        </form>
                             </div>
                         <?php endif; ?>
                     </td>

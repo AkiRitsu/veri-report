@@ -165,25 +165,13 @@
     </div>
     <?php endif; ?>
 
-    <?php if($report->pdf_hash): ?>
-    <div class="section">
-        <h2>PDF Verification Hash</h2>
-        <div class="hash-box">
-            <?php echo e($report->pdf_hash); ?>
-
-        </div>
-        <p style="font-size: 10px; color: #6b7280; margin-top: 5px;">
-            This hash can be used to verify the integrity of this PDF document. 
-            Compare this hash with the hash stored in the system to ensure the document has not been altered.
-        </p>
-    </div>
-    <?php endif; ?>
 
     <div class="footer">
         <p><strong>Created At:</strong> <?php echo e($report->created_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s')); ?></p>
-        <p><strong>Last Updated:</strong> <?php echo e($report->updated_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s')); ?></p>
         <?php if($report->completed_at): ?>
             <p><strong>Completed At:</strong> <?php echo e($report->completed_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s')); ?></p>
+        <?php else: ?>
+            <p><strong>Last Updated:</strong> <?php echo e($report->updated_at->setTimezone('Asia/Kuala_Lumpur')->format('Y-m-d H:i:s')); ?></p>
         <?php endif; ?>
         <p><strong>Created By:</strong> <?php echo e($report->user->name); ?></p>
     </div>
