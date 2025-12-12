@@ -117,8 +117,8 @@ class AuthController extends Controller
             $admin->save();
         } elseif (Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();
-            $user->dark_mode = !$user->dark_mode;
-            $user->save();
+        $user->dark_mode = !$user->dark_mode;
+        $user->save();
         }
 
         return back();

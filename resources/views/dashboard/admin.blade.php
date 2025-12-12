@@ -60,7 +60,7 @@
 <h1 style="margin-bottom: 1.5rem;">Admin Dashboard</h1>
 
 <!-- Completed Reports Chart -->
-<div class="card" style="margin-bottom: 2rem;">
+<div class="card" style="margin-    bottom: 2rem;">
     <h2 style="margin-bottom: 1rem;">Completed Reports</h2>
     <div class="period-selector">
         <a href="{{ route('dashboard', ['period' => 'daily']) }}" class="period-btn {{ $period === 'daily' ? 'active' : '' }}">Daily</a>

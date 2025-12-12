@@ -264,8 +264,8 @@ class ReportController extends Controller
 
     /**
      * Send the report via email.
-     * Note: Hash is NOT updated here - it is only updated when exporting PDF.
-     * We use the existing stored hash (from export) if available, otherwise calculate one for email display only.
+     * Note: Hash is calculated from the actual PDF being sent, but NOT stored in database.
+     * Database hash is only updated when exporting PDF locally.
      */
     public function sendEmail(Report $report)
     {
@@ -273,14 +273,8 @@ class ReportController extends Controller
             // Generate PDF for email
             $pdf = $this->pdfService->generatePdf($report);
             
-            // Use existing stored hash if available (from PDF export)
-            // Otherwise, calculate hash for email display only (but don't store it)
-            if ($report->pdf_hash) {
-                $hash = $report->pdf_hash; // Use stored hash from export
-            } else {
-                // No hash exists yet, calculate one for email display only
-                $hash = $this->pdfService->generateHash($pdf);
-            }
+            // Calculate hash from the actual PDF being sent (don't store in database)
+            $hash = $this->pdfService->generateHash($pdf);
 
             $this->emailService->sendReportEmail($report, $pdf, $hash);
 
