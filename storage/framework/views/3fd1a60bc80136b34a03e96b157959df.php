@@ -117,6 +117,8 @@
 <div style="margin-top: 1rem;">
     <?php if(request('from') === 'dashboard'): ?>
         <a href="<?php echo e(route('dashboard')); ?>" class="btn btn-secondary">Back to Dashboard</a>
+    <?php elseif(request('from') === 'technician-reports' && request('user_id')): ?>
+        <a href="<?php echo e(route('admin.technicians.reports', request('user_id'))); ?>" class="btn btn-secondary">Back to Reports for <?php echo e($report->user->name); ?></a>
     <?php elseif(request('from') === 'all-reports'): ?>
         <a href="<?php echo e(route('reports.index')); ?>" class="btn btn-secondary">Back to All Reports</a>
     <?php elseif($report->status === 'complete'): ?>

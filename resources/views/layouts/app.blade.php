@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ auth()->check() && auth()->user()->dark_mode ? 'dark' : 'light' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ (auth()->guard('admin')->check() && auth()->guard('admin')->user()->dark_mode) || (auth()->guard('web')->check() && auth()->guard('web')->user()->dark_mode) ? 'dark' : 'light' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -519,7 +519,7 @@
     @yield('styles')
 </head>
 <body>
-    @auth
+    @if(auth()->guard('admin')->check() || auth()->guard('web')->check())
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('dashboard') }}" class="navbar-brand">Troubleshooting Report System</a>
@@ -528,11 +528,15 @@
                 <li><a href="{{ route('reports.index') }}">All Reports</a></li>
                 <li><a href="{{ route('reports.completed') }}">Completed Reports</a></li>
                 <li><a href="{{ route('reports.create') }}">New Report</a></li>
+                @if(auth()->guard('admin')->check())
+                <li><a href="{{ route('admin.users.monitoring') }}">User Monitoring</a></li>
+                <li><a href="{{ route('admin.technicians.create') }}">Create Technician</a></li>
+                @endif
                 <li>
                     <form method="POST" action="{{ route('toggle-dark-mode') }}" style="display: inline;" id="dark-mode-form">
                         @csrf
-                        <button type="submit" class="btn" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;" title="{{ auth()->user()->dark_mode ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}">
-                            {{ auth()->user()->dark_mode ? '☀️' : '🌙' }}
+                        <button type="submit" class="btn" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;" title="{{ ((auth()->guard('admin')->check() && auth()->guard('admin')->user()->dark_mode) || (auth()->guard('web')->check() && auth()->guard('web')->user()->dark_mode)) ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}">
+                            {{ ((auth()->guard('admin')->check() && auth()->guard('admin')->user()->dark_mode) || (auth()->guard('web')->check() && auth()->guard('web')->user()->dark_mode)) ? '☀️' : '🌙' }}
                         </button>
                     </form>
                 </li>
@@ -545,7 +549,7 @@
             </ul>
         </div>
     </nav>
-    @endauth
+    @endif
 
     <div class="container">
         @if(session('success'))

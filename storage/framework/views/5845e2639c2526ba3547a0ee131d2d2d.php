@@ -26,6 +26,10 @@
     <form method="POST" action="<?php echo e(route('reports.update', $report)); ?>">
         <?php echo csrf_field(); ?>
         <?php echo method_field('PUT'); ?>
+        <?php if(request('from') === 'technician-reports' && request('user_id')): ?>
+            <input type="hidden" name="from" value="technician-reports">
+            <input type="hidden" name="user_id" value="<?php echo e(request('user_id')); ?>">
+        <?php endif; ?>
 
         <div class="form-group">
             <label for="client_name" class="form-label">Client Name *</label>
@@ -79,7 +83,11 @@
 
         <div class="form-group" style="display: flex; gap: 0.5rem; align-items: center;">
             <button type="submit" class="btn btn-primary form-action-btn">Update Report</button>
-            <a href="<?php echo e(route('reports.index')); ?>" class="btn btn-secondary form-action-btn">Cancel</a>
+            <?php if(request('from') === 'technician-reports' && request('user_id')): ?>
+                <a href="<?php echo e(route('admin.technicians.reports', request('user_id'))); ?>" class="btn btn-secondary form-action-btn">Cancel</a>
+            <?php else: ?>
+                <a href="<?php echo e(route('reports.index')); ?>" class="btn btn-secondary form-action-btn">Cancel</a>
+            <?php endif; ?>
         </div>
     </form>
 </div>

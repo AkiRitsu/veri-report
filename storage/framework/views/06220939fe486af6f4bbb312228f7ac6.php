@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Create Report'); ?>
 
 <?php $__env->startSection('styles'); ?>
@@ -75,6 +73,28 @@
             <label for="additional_notes" class="form-label">Additional Notes</label>
             <textarea id="additional_notes" name="additional_notes" class="form-control" rows="3"><?php echo e(old('additional_notes')); ?></textarea>
         </div>
+
+        <?php if(auth()->guard('admin')->check() && $technicians): ?>
+        <div class="form-group">
+            <label for="user_id" class="form-label">Assign to Technician *</label>
+            <select id="user_id" name="user_id" class="form-control" required>
+                <option value="">Select Technician</option>
+                <?php $__currentLoopData = $technicians; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $technician): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($technician->id); ?>" <?php echo e(old('user_id') == $technician->id ? 'selected' : ''); ?>><?php echo e($technician->name); ?> (<?php echo e($technician->email); ?>)</option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </select>
+            <?php $__errorArgs = ['user_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                <span class="error-message"><?php echo e($message); ?></span>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+        </div>
+        <?php endif; ?>
 
         <div class="form-group" style="display: flex; gap: 0.5rem; align-items: center;">
             <button type="submit" class="btn btn-primary form-action-btn">Create Report</button>

@@ -26,6 +26,10 @@
     <form method="POST" action="{{ route('reports.update', $report) }}">
         @csrf
         @method('PUT')
+        @if(request('from') === 'technician-reports' && request('user_id'))
+            <input type="hidden" name="from" value="technician-reports">
+            <input type="hidden" name="user_id" value="{{ request('user_id') }}">
+        @endif
 
         <div class="form-group">
             <label for="client_name" class="form-label">Client Name *</label>
@@ -79,7 +83,11 @@
 
         <div class="form-group" style="display: flex; gap: 0.5rem; align-items: center;">
             <button type="submit" class="btn btn-primary form-action-btn">Update Report</button>
-            <a href="{{ route('reports.index') }}" class="btn btn-secondary form-action-btn">Cancel</a>
+            @if(request('from') === 'technician-reports' && request('user_id'))
+                <a href="{{ route('admin.technicians.reports', request('user_id')) }}" class="btn btn-secondary form-action-btn">Cancel</a>
+            @else
+                <a href="{{ route('reports.index') }}" class="btn btn-secondary form-action-btn">Cancel</a>
+            @endif
         </div>
     </form>
 </div>

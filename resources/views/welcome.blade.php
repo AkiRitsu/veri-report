@@ -524,8 +524,7 @@
         <div class="header-container">
             <a href="{{ route('welcome') }}" class="brand">Troubleshooting Reports</a>
             <div class="header-buttons">
-                <a href="{{ route('login') }}" class="header-btn">Login</a>
-                <a href="{{ route('register') }}" class="header-btn primary">Sign Up</a>
+                <a href="{{ route('login') }}" class="header-btn primary">Login</a>
             </div>
         </div>
     </header>
@@ -677,7 +676,6 @@
             <div class="footer-links scroll-animate scroll-animate-delay-1">
                 <a href="{{ route('welcome') }}" class="footer-link">Home</a>
                 <a href="{{ route('login') }}" class="footer-link">Login</a>
-                <a href="{{ route('register') }}" class="footer-link">Sign Up</a>
             </div>
         </div>
     </footer>

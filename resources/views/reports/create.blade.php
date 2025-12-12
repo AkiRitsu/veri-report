@@ -76,6 +76,21 @@
             <textarea id="additional_notes" name="additional_notes" class="form-control" rows="3">{{ old('additional_notes') }}</textarea>
         </div>
 
+        @if(auth()->guard('admin')->check() && $technicians)
+        <div class="form-group">
+            <label for="user_id" class="form-label">Assign to Technician *</label>
+            <select id="user_id" name="user_id" class="form-control" required>
+                <option value="">Select Technician</option>
+                @foreach($technicians as $technician)
+                    <option value="{{ $technician->id }}" {{ old('user_id') == $technician->id ? 'selected' : '' }}>{{ $technician->name }} ({{ $technician->email }})</option>
+                @endforeach
+            </select>
+            @error('user_id')
+                <span class="error-message">{{ $message }}</span>
+            @enderror
+        </div>
+        @endif
+
         <div class="form-group" style="display: flex; gap: 0.5rem; align-items: center;">
             <button type="submit" class="btn btn-primary form-action-btn">Create Report</button>
             <a href="{{ route('reports.index') }}" class="btn btn-secondary form-action-btn">Cancel</a>
