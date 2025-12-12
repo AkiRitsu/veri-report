@@ -8,6 +8,7 @@ use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -19,7 +20,7 @@ class ReportController extends Controller
      */
     public function __construct(PdfService $pdfService, EmailService $emailService)
     {
-        $this->middleware('auth');
+        // No middleware needed here - route already has check.auth middleware
         $this->pdfService = $pdfService;
         $this->emailService = $emailService;
     }
@@ -30,6 +31,11 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $query = Report::query();
+
+        // Filter by role: technicians only see their own reports, admin sees all
+        if (Auth::guard('web')->check()) {
+            $query->where('user_id', Auth::guard('web')->id());
+        }
 
         // Filter by status
         if ($request->filled('status')) {
@@ -72,6 +78,11 @@ class ReportController extends Controller
     {
         $query = Report::where('status', 'complete');
 
+        // Filter by role: technicians only see their own reports, admin sees all
+        if (Auth::guard('web')->check()) {
+            $query->where('user_id', Auth::guard('web')->id());
+        }
+
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
@@ -106,7 +117,11 @@ class ReportController extends Controller
      */
     public function create()
     {
-        return view('reports.create');
+        $technicians = null;
+        if (Auth::guard('admin')->check()) {
+            $technicians = \App\Models\User::orderBy('name')->get();
+        }
+        return view('reports.create', compact('technicians'));
     }
 
     /**
@@ -124,9 +139,13 @@ class ReportController extends Controller
             'phone_number' => 'required|string|max:20',
             'client_email' => 'required|email|max:255',
             'additional_notes' => 'nullable|string',
+            'user_id' => Auth::guard('admin')->check() ? 'required|exists:users,id' : 'nullable',
         ]);
 
-        $validated['user_id'] = auth()->id();
+        // If admin, use assigned user_id; if technician, use their own id
+        $validated['user_id'] = Auth::guard('admin')->check() 
+            ? $validated['user_id'] 
+            : Auth::guard('web')->id();
         $validated['status'] = 'on-going';
 
         Report::create($validated);
@@ -139,6 +158,10 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
+        // Technicians can only view their own reports
+        if (Auth::guard('web')->check() && $report->user_id !== Auth::guard('web')->id()) {
+            abort(403, 'Unauthorized access.');
+        }
         return view('reports.show', compact('report'));
     }
 
@@ -147,6 +170,10 @@ class ReportController extends Controller
      */
     public function edit(Report $report)
     {
+        // Technicians can only edit their own reports
+        if (Auth::guard('web')->check() && $report->user_id !== Auth::guard('web')->id()) {
+            abort(403, 'Unauthorized access.');
+        }
         return view('reports.edit', compact('report'));
     }
 
@@ -171,6 +198,11 @@ class ReportController extends Controller
 
         // Note: Hash will be recalculated when PDF is exported or emailed
         // We don't calculate it here to ensure it matches the actual exported PDF
+
+        // Redirect back to technician reports page if coming from there
+        if ($request->get('from') === 'technician-reports' && $request->get('user_id')) {
+            return redirect()->route('admin.technicians.reports', $request->get('user_id'))->with('success', 'Report updated successfully.');
+        }
 
         return redirect()->route('reports.index')->with('success', 'Report updated successfully.');
     }
@@ -263,6 +295,10 @@ class ReportController extends Controller
      */
     public function destroy(Report $report)
     {
+        // Technicians can only delete their own reports
+        if (Auth::guard('web')->check() && $report->user_id !== Auth::guard('web')->id()) {
+            abort(403, 'Unauthorized access.');
+        }
         $report->delete();
         return redirect()->back()->with('success', 'Report deleted successfully.');
     }

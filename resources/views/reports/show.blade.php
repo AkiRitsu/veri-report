@@ -116,6 +116,8 @@
 <div style="margin-top: 1rem;">
     @if(request('from') === 'dashboard')
         <a href="{{ route('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    @elseif(request('from') === 'technician-reports' && request('user_id'))
+        <a href="{{ route('admin.technicians.reports', request('user_id')) }}" class="btn btn-secondary">Back to Reports for {{ $report->user->name }}</a>
     @elseif(request('from') === 'all-reports')
         <a href="{{ route('reports.index') }}" class="btn btn-secondary">Back to All Reports</a>
     @elseif($report->status === 'complete')

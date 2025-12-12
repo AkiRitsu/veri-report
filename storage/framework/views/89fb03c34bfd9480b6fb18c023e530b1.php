@@ -1,3 +1,5 @@
+
+
 <?php $__env->startSection('title', 'Dashboard'); ?>
 
 <?php $__env->startSection('styles'); ?>
@@ -14,12 +16,56 @@
         justify-content: center;
         line-height: 1;
     }
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 2rem;
+    }
+    .period-selector {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .period-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .period-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    .period-btn:hover {
+        background: var(--primary-light);
+        color: white;
+    }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
 <h1 style="margin-bottom: 1.5rem;">Dashboard</h1>
 
+<!-- Completed Reports Chart -->
+<div class="card" style="margin-bottom: 2rem;">
+    <h2 style="margin-bottom: 1rem;">My Completed Reports</h2>
+    <div class="period-selector">
+        <a href="<?php echo e(route('dashboard', ['period' => 'daily'])); ?>" class="period-btn <?php echo e($period === 'daily' ? 'active' : ''); ?>">Daily</a>
+        <a href="<?php echo e(route('dashboard', ['period' => 'weekly'])); ?>" class="period-btn <?php echo e($period === 'weekly' ? 'active' : ''); ?>">Weekly</a>
+        <a href="<?php echo e(route('dashboard', ['period' => 'monthly'])); ?>" class="period-btn <?php echo e($period === 'monthly' ? 'active' : ''); ?>">Monthly</a>
+    </div>
+    <div class="chart-container">
+        <canvas id="completedReportsChart"></canvas>
+    </div>
+</div>
+
+<!-- Recent Reports -->
 <div class="card">
     <h2 style="margin-bottom: 1rem;">Recent Reports</h2>
     
@@ -87,7 +133,44 @@
         <p>No reports yet. <a href="<?php echo e(route('reports.create')); ?>">Create your first report</a></p>
     <?php endif; ?>
 </div>
+
+<script>
+    const ctx = document.getElementById('completedReportsChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($chartData['labels'], 15, 512) ?>,
+            datasets: [{
+                label: 'Completed Reports',
+                data: <?php echo json_encode($chartData['data'], 15, 512) ?>,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
 <?php $__env->stopSection(); ?>
 
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\alson\troubleshooting-report-system\resources\views/dashboard/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\alson\troubleshooting-report-system\resources\views/dashboard/technician.blade.php ENDPATH**/ ?>

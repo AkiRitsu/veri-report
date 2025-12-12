@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [AuthController::class, 'showWelcome'])->name('welcome');
 
 // Authentication routes
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Password reset routes
@@ -30,8 +31,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-// Protected routes
-Route::middleware('auth')->group(function () {
+// Protected routes - allow both admin and user guards
+Route::middleware('check.auth')->group(function () {
     // Dark mode toggle
     Route::post('/toggle-dark-mode', [AuthController::class, 'toggleDarkMode'])->name('toggle-dark-mode');
     
@@ -50,5 +51,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/{report}/export', [ReportController::class, 'exportPdf'])->name('reports.export');
     Route::post('/reports/{report}/send-email', [ReportController::class, 'sendEmail'])->name('reports.send-email');
     Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/technicians/create', [AdminController::class, 'createTechnician'])->name('technicians.create');
+        Route::post('/technicians', [AdminController::class, 'storeTechnician'])->name('technicians.store');
+        Route::get('/users/monitoring', [AdminController::class, 'userMonitoring'])->name('users.monitoring');
+        Route::get('/technicians/{user}/reports', [AdminController::class, 'technicianReports'])->name('technicians.reports');
+    });
 });
 

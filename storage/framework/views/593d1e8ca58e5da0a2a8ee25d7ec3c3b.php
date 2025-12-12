@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" data-theme="<?php echo e(auth()->check() && auth()->user()->dark_mode ? 'dark' : 'light'); ?>">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" data-theme="<?php echo e((auth()->guard('admin')->check() && auth()->guard('admin')->user()->dark_mode) || (auth()->guard('web')->check() && auth()->guard('web')->user()->dark_mode) ? 'dark' : 'light'); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -519,7 +519,7 @@
     <?php echo $__env->yieldContent('styles'); ?>
 </head>
 <body>
-    <?php if(auth()->guard()->check()): ?>
+    <?php if(auth()->guard('admin')->check() || auth()->guard('web')->check()): ?>
     <nav class="navbar">
         <div class="navbar-container">
             <a href="<?php echo e(route('dashboard')); ?>" class="navbar-brand">Troubleshooting Report System</a>
@@ -528,11 +528,15 @@
                 <li><a href="<?php echo e(route('reports.index')); ?>">All Reports</a></li>
                 <li><a href="<?php echo e(route('reports.completed')); ?>">Completed Reports</a></li>
                 <li><a href="<?php echo e(route('reports.create')); ?>">New Report</a></li>
+                <?php if(auth()->guard('admin')->check()): ?>
+                <li><a href="<?php echo e(route('admin.users.monitoring')); ?>">User Monitoring</a></li>
+                <li><a href="<?php echo e(route('admin.technicians.create')); ?>">Create Technician</a></li>
+                <?php endif; ?>
                 <li>
                     <form method="POST" action="<?php echo e(route('toggle-dark-mode')); ?>" style="display: inline;" id="dark-mode-form">
                         <?php echo csrf_field(); ?>
-                        <button type="submit" class="btn" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;" title="<?php echo e(auth()->user()->dark_mode ? 'Switch to Light Mode' : 'Switch to Dark Mode'); ?>">
-                            <?php echo e(auth()->user()->dark_mode ? '☀️' : '🌙'); ?>
+                        <button type="submit" class="btn" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease;" title="<?php echo e(((auth()->guard('admin')->check() && auth()->guard('admin')->user()->dark_mode) || (auth()->guard('web')->check() && auth()->guard('web')->user()->dark_mode)) ? 'Switch to Light Mode' : 'Switch to Dark Mode'); ?>">
+                            <?php echo e(((auth()->guard('admin')->check() && auth()->guard('admin')->user()->dark_mode) || (auth()->guard('web')->check() && auth()->guard('web')->user()->dark_mode)) ? '☀️' : '🌙'); ?>
 
                         </button>
                     </form>

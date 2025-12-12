@@ -524,8 +524,7 @@
         <div class="header-container">
             <a href="<?php echo e(route('welcome')); ?>" class="brand">Troubleshooting Reports</a>
             <div class="header-buttons">
-                <a href="<?php echo e(route('login')); ?>" class="header-btn">Login</a>
-                <a href="<?php echo e(route('register')); ?>" class="header-btn primary">Sign Up</a>
+                <a href="<?php echo e(route('login')); ?>" class="header-btn primary">Login</a>
             </div>
         </div>
     </header>
@@ -677,7 +676,6 @@
             <div class="footer-links scroll-animate scroll-animate-delay-1">
                 <a href="<?php echo e(route('welcome')); ?>" class="footer-link">Home</a>
                 <a href="<?php echo e(route('login')); ?>" class="footer-link">Login</a>
-                <a href="<?php echo e(route('register')); ?>" class="footer-link">Sign Up</a>
             </div>
         </div>
     </footer>

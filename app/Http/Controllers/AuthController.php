@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -62,18 +63,33 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|string',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
+        $email = $request->email;
+        $password = $request->password;
+
+        // Try admin login first (admin uses 'admin' as email)
+        $adminAttempt = Auth::guard('admin')->attempt(['email' => $email, 'password' => $password], $request->filled('remember'));
+        
+        if ($adminAttempt) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard');
+            return redirect()->route('dashboard')->with('success', 'Logged in successfully as admin.');
         }
 
-        throw ValidationException::withMessages([
-            'email' => ['The provided credentials do not match our records.'],
-        ]);
+        // Try user login
+        $userAttempt = Auth::guard('web')->attempt(['email' => $email, 'password' => $password], $request->filled('remember'));
+        
+        if ($userAttempt) {
+            $request->session()->regenerate();
+            return redirect()->route('dashboard')->with('success', 'Logged in successfully.');
+        }
+
+        // If both failed, return with error
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->withInput($request->only('email'));
     }
 
     /**
@@ -81,7 +97,9 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Logout from both guards
+        Auth::guard('web')->logout();
+        Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -89,13 +107,19 @@ class AuthController extends Controller
     }
 
     /**
-     * Toggle dark mode for the authenticated user.
+     * Toggle dark mode for the authenticated user or admin.
      */
     public function toggleDarkMode(Request $request)
     {
-        $user = Auth::user();
-        $user->dark_mode = !$user->dark_mode;
-        $user->save();
+        if (Auth::guard('admin')->check()) {
+            $admin = Auth::guard('admin')->user();
+            $admin->dark_mode = !$admin->dark_mode;
+            $admin->save();
+        } elseif (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+            $user->dark_mode = !$user->dark_mode;
+            $user->save();
+        }
 
         return back();
     }

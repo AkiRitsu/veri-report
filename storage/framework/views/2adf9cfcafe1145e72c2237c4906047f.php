@@ -219,7 +219,7 @@
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" value="<?php echo e(old('email')); ?>" required autofocus placeholder="Enter your email">
+                    <input type="text" id="email" name="email" class="form-control" value="<?php echo e(old('email')); ?>" required autofocus placeholder="Enter your email">
                 </div>
 
                 <div class="form-group">
@@ -236,7 +236,6 @@
 
                 <div class="link-text">
                     <p><a href="<?php echo e(route('password.request')); ?>">Forgot your password?</a></p>
-                    <p>Don't have an account? <a href="<?php echo e(route('register')); ?>">Register here</a></p>
                 </div>
             </form>
         </div>
